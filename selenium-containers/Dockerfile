@@ -1,4 +1,6 @@
-FROM --platform=linux/amd64  python:3-slim
+FROM  --platform=linux/amd64d python:3-slim
+
+ENV CHROME_DRIVER_DIR=/usr/local/bin
 
 RUN apt-get -y update && apt-get install -y unzip curl gnupg git
 
@@ -11,8 +13,9 @@ RUN apt-get -y update && apt-get install -y google-chrome-stable \
 # install chromedriver
 RUN CHROMEDRIVER_LATEST_RELEASE=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
   && curl -o /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_LATEST_RELEASE}/chromedriver_linux64.zip \
-  && unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/ \
-  && rm /tmp/chromedriver.zip
+  && unzip /tmp/chromedriver.zip chromedriver -d "${CHROME_DRIVER_DIR}" \
+  && rm /tmp/chromedriver.zip \
+  && "${CHROME_DRIVER_DIR}/chromedriver" --version
 
 # set display port to avoid crash and dbus env to avoid hanging
 ENV DISPLAY=:99
@@ -22,7 +25,8 @@ COPY requirements.txt /tmp/
 
 RUN cd /tmp \
     && pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && timeout --foreground --verbose 10  --chrome_driver_path  "${CHROME_DRIVER_DIR}/chromedriver" --google_chrome_path "$(which google-chrome-stable)"
 
 RUN mkdir /code
 WORKDIR /code
