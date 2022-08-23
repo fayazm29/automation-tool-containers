@@ -26,7 +26,7 @@ COPY requirements.txt /tmp/
 RUN cd /tmp \
     && pip install --upgrade pip \
     && pip install -r requirements.txt \
-    && timeout --foreground --verbose 10  --chrome_driver_path  "${CHROME_DRIVER_DIR}/chromedriver" --google_chrome_path "$(which google-chrome-stable)"
+    && timeout --foreground --verbose 10  python3 selenium-smoke-test.py --chrome_driver_path  "${CHROME_DRIVER_DIR}/chromedriver" --google_chrome_path "$(which google-chrome-stable)"
 
 RUN mkdir /code
 WORKDIR /code
